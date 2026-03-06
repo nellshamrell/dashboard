@@ -15,6 +15,7 @@ import {
   ApplicationListPage,
   EnvironmentListPage,
   EnvironmentPage,
+  PreviewPage,
   RecipeListPage,
   ResourceListPage,
   ResourceTypesListPage,
@@ -109,6 +110,7 @@ const routes = (
       element={<ResourceTypeDetailPage />}
     />
     <Route path="/resources" element={<ResourceListPage />} />
+    <Route path="/preview" element={<PreviewPage />} />
     <Route
       path="/resources/:group/:namespace/:type/:name"
       element={<ResourcePage />}

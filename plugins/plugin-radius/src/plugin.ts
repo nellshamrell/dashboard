@@ -9,6 +9,7 @@ import {
   applicationListPageRouteRef,
   environmentListPageRouteRef,
   environmentPageRouteRef,
+  previewPageRouteRef,
   recipeListPageRouteRef,
   resourceListPageRouteRef,
   resourceTypesListPageRouteRef,
@@ -115,5 +116,14 @@ export const ResourceTypeDetailPage = radiusPlugin.provide(
     component: () =>
       import('./components/resourcetypes').then(m => m.ResourceTypeDetailPage),
     mountPoint: resourceTypeDetailPageRouteRef,
+  }),
+);
+
+export const PreviewPage = radiusPlugin.provide(
+  createRoutableExtension({
+    name: 'Preview',
+    component: () =>
+      import('./components/preview').then(m => m.PreviewPage),
+    mountPoint: previewPageRouteRef,
   }),
 );

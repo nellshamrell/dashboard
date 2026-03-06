@@ -17,6 +17,7 @@ import {
   Link,
 } from '@backstage/core-components';
 import MenuIcon from '@material-ui/icons/Menu';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import {
   RadiusLogo,
   RadiusLogomarkReverse,
@@ -87,6 +88,7 @@ export const Root = ({ children }: PropsWithChildren<NonNullable<object>>) => (
         />
         <SidebarItem icon={ResourceIcon} to="resources" text="Resources" />
         <SidebarItem icon={RecipeIcon} to="recipes" text="Recipes" />
+        <SidebarItem icon={VisibilityIcon} to="preview" text="Preview" />
         {/* End global nav */}
         <SidebarDivider />
         <SidebarScrollWrapper />
