@@ -16,3 +16,10 @@ export type {
   ApplicationGraphConnection,
   ValidationResult,
 } from './lib/graphImport';
+
+export {
+  encodeGraphUrl,
+  decodeGraphUrl,
+  copyShareUrl,
+} from './lib/shareableUrl';
+export type { EncodeResult } from './lib/shareableUrl';
