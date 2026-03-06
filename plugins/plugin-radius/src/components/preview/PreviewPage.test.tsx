@@ -28,6 +28,13 @@ jest.mock('@radapp.io/rad-components', () => {
           { 'data-testid': 'graph-resource-count' },
           String(graph.resources.length),
         ),
+        props.isPreview
+          ? React.createElement(
+              'span',
+              { 'data-testid': 'graph-is-preview' },
+              'true',
+            )
+          : null,
       );
     },
   };
@@ -193,6 +200,42 @@ describe('PreviewPage', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('graph-resource-count')).toHaveTextContent('2');
+    });
+  });
+
+  it('renders preview banner when graph is loaded', async () => {
+    await renderInTestApp(<PreviewPage />);
+
+    // Banner should not be present before import
+    expect(screen.queryByTestId('preview-banner')).not.toBeInTheDocument();
+
+    const textArea = screen.getByLabelText('JSON input');
+    fireEvent.change(textArea, {
+      target: { value: JSON.stringify(validResponse) },
+    });
+    fireEvent.click(screen.getByText('Import'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('preview-banner')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This graph was imported from a file and does not represent a deployed application.',
+        ),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('passes isPreview prop to AppGraph', async () => {
+    await renderInTestApp(<PreviewPage />);
+
+    const textArea = screen.getByLabelText('JSON input');
+    fireEvent.change(textArea, {
+      target: { value: JSON.stringify(validResponse) },
+    });
+    fireEvent.click(screen.getByText('Import'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('graph-is-preview')).toHaveTextContent('true');
     });
   });
 });

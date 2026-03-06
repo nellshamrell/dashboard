@@ -18,8 +18,8 @@ import { parseResourceId } from '../../resourceId';
 
 const nodeTypes = { default: ResourceNode };
 
-const LayoutFlow = (props: { graph: AppGraphData }) => {
-  const initial = initialNodes(props.graph);
+const LayoutFlow = (props: { graph: AppGraphData; isPreview?: boolean }) => {
+  const initial = initialNodes(props.graph, props.isPreview);
   const layoutedNodes = getLayoutedElements(initial.nodes, initial.edges, {
     direction: 'TB',
   });
@@ -52,7 +52,13 @@ const LayoutFlow = (props: { graph: AppGraphData }) => {
     <ReactFlow
       defaultNodes={nodes}
       defaultEdges={edges}
-      defaultEdgeOptions={{ type: 'bezier', animated: true }}
+      defaultEdgeOptions={{
+        type: 'bezier',
+        animated: !props.isPreview,
+        ...(props.isPreview
+          ? { style: { strokeDasharray: '5 5', stroke: '#9e9e9e' } }
+          : {}),
+      }}
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
@@ -63,23 +69,26 @@ const LayoutFlow = (props: { graph: AppGraphData }) => {
   );
 };
 
-export type AppGraphProps = { graph: AppGraphData };
+export type AppGraphProps = { graph: AppGraphData; isPreview?: boolean };
 
 function AppGraph(props: AppGraphProps) {
   return (
-    <div {...props} style={{ height: '100%', width: '100%' }}>
+    <div style={{ height: '100%', width: '100%' }}>
       <ReactFlowProvider>
-        <LayoutFlow graph={props.graph} />
+        <LayoutFlow graph={props.graph} isPreview={props.isPreview} />
       </ReactFlowProvider>
     </div>
   );
 }
 
-function initialNodes(graph: AppGraphData): {
-  nodes: Node<Resource>[];
+function initialNodes(
+  graph: AppGraphData,
+  isPreview?: boolean,
+): {
+  nodes: Node<Resource & { isPreview?: boolean }>[];
   edges: Edge[];
 } {
-  const nodes: Node<Resource>[] = [];
+  const nodes: Node<Resource & { isPreview?: boolean }>[] = [];
   const edges: Edge[] = [];
 
   // Very simple layout scheme here for nodes.
@@ -105,7 +114,7 @@ function initialNodes(graph: AppGraphData): {
       position: { x: rank * 50, y: order * 50 },
       height: 250,
       width: 175,
-      data: resource,
+      data: { ...resource, isPreview },
       type: 'default',
     });
 

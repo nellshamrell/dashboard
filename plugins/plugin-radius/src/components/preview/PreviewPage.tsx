@@ -11,6 +11,7 @@ import {
 import {
   GraphImportPanel,
   AppGraph as AppGraphComponent,
+  PreviewBanner,
   transformToAppGraph,
 } from '@radapp.io/rad-components';
 import type {
@@ -88,8 +89,14 @@ export const PreviewPage = () => {
 
           {graph && (
             <Grid item>
+              <PreviewBanner />
+            </Grid>
+          )}
+
+          {graph && (
+            <Grid item>
               <Box style={{ height: '600px', width: '100%' }}>
-                <AppGraphComponent graph={graph} />
+                <AppGraphComponent graph={graph} isPreview />
               </Box>
             </Grid>
           )}
