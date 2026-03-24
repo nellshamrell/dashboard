@@ -6,10 +6,12 @@ import {
   ResponseErrorPanel,
 } from '@backstage/core-components';
 import { kubernetesApiRef } from '@backstage/plugin-kubernetes';
-import { useApi } from '@backstage/core-plugin-api';
+import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 import useAsync from 'react-use/lib/useAsync';
 import { AppGraph } from '@radapp.io/rad-components';
 import { makeStyles } from '@material-ui/core';
+import { usePreviewMode } from '../../preview/usePreviewMode';
+import { PreviewBanner } from '../preview/PreviewBanner';
 
 export interface AppGraphData {
   name: string;
@@ -46,8 +48,23 @@ const useStyles = makeStyles({
 export const ApplicationTab = ({ application }: { application: string }) => {
   const styles = useStyles();
   const kubernetesApi = useApi(kubernetesApiRef);
+  const fetchApi = useApi(fetchApiRef);
+  const { isPreview } = usePreviewMode();
+
   const { value, loading, error } =
     useAsync(async (): Promise<AppGraphData> => {
+      if (isPreview) {
+        const appName = parseResourceId(application)?.name ?? application;
+        const response = await fetchApi.fetch(
+          `/api/radius/preview/graph/${encodeURIComponent(appName)}`,
+          { method: 'POST' },
+        );
+        if (!response.ok) {
+          throw new Error(`Preview graph request failed: ${response.status}`);
+        }
+        return (await response.json()) as AppGraphData;
+      }
+
       let first = '';
       const clusters = await kubernetesApi.getClusters();
       for (const cluster of clusters) {
@@ -71,7 +88,7 @@ export const ApplicationTab = ({ application }: { application: string }) => {
       }
 
       return (await response.json()) as AppGraphData;
-    }, [application]);
+    }, [application, isPreview]);
 
   if (loading || !value) {
     return <Progress />;
@@ -81,8 +98,14 @@ export const ApplicationTab = ({ application }: { application: string }) => {
 
   return (
     <>
+      <PreviewBanner isPreview={isPreview} />
       <InfoCard
         title={`Application Graph: ${parseResourceId(application)?.name}`}
+        subheader={
+          isPreview
+            ? 'Preview — deploy with Radius to see live resources.'
+            : undefined
+        }
       >
         <div className={styles.container}>
           <AppGraph graph={value!} />
