@@ -14,19 +14,31 @@ import { EnvironmentProperties, Resource, ResourceList } from '../../resources';
 import { ResourceLink } from '../resourcelink';
 import { environmentPageRouteRef } from '../../routes';
 import { parseResourceId } from '@radapp.io/rad-components';
+import { usePreviewMode } from '../../preview/usePreviewMode';
+import Typography from '@mui/material/Typography';
 
-const EnvironmentListInfoContent = () => {
+const EnvironmentListInfoFetcher = ({ isPreview }: { isPreview: boolean }) => {
   const route = useRouteRef(environmentPageRouteRef);
 
   const radiusApi = useApi(radiusApiRef);
   const { value, loading, error } = useAsync(
-    async (): Promise<ResourceList<EnvironmentProperties>> => {
+    async (): Promise<ResourceList<EnvironmentProperties> | null> => {
+      if (isPreview) {
+        return null;
+      }
       return radiusApi.listEnvironments<EnvironmentProperties>();
     },
+    [isPreview],
   );
 
   if (loading) {
     return <Progress data-testid="progress" />;
+  } else if (isPreview) {
+    return (
+      <Typography variant="body2" color="textSecondary" style={{ padding: 16 }}>
+        Environment details will be available after deploying to Radius.
+      </Typography>
+    );
   } else if (error) {
     return <ResponseErrorPanel error={error} />;
   }
@@ -72,6 +84,16 @@ const EnvironmentListInfoContent = () => {
       data={value?.value || []}
     />
   );
+};
+
+const EnvironmentListInfoContent = () => {
+  const { isPreview, loading: previewLoading } = usePreviewMode();
+
+  if (previewLoading) {
+    return <Progress data-testid="progress" />;
+  }
+
+  return <EnvironmentListInfoFetcher isPreview={isPreview} />;
 };
 
 export const EnvironmentListInfoCard = () => {

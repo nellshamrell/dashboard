@@ -9,20 +9,46 @@ import { OverviewTab } from './OverviewTab';
 import { DetailsTab } from './DetailsTab';
 import { Resource } from '../../resources';
 import useAsync from 'react-use/lib/useAsync';
-import { useApi, useRouteRefParams } from '@backstage/core-plugin-api';
+import { useApi, useRouteRefParams, fetchApiRef } from '@backstage/core-plugin-api';
 import { resourcePageRouteRef } from '../../routes';
 import { ApplicationTab } from './ApplicationTab';
 import { ApplicationResourcesTab } from './ApplicationResourcesTab';
 import { radiusApiRef } from '../../plugin';
+import { usePreviewMode } from '../../preview/usePreviewMode';
 
-export const ResourcePage = () => {
+// Inner component that fetches data — only mounted after preview state is known
+const ResourcePageContent = ({ isPreview }: { isPreview: boolean }) => {
   const radiusApi = useApi(radiusApiRef);
+  const fetchApi = useApi(fetchApiRef);
   const params = useRouteRefParams(resourcePageRouteRef);
   const id = `/planes/radius/local/resourceGroups/${params.group}/providers/${params.namespace}/${params.type}/${params.name}`;
 
   const { value, loading, error } = useAsync(async (): Promise<Resource> => {
+    if (isPreview) {
+      const response = await fetchApi.fetch('/api/radius/preview/applications');
+      if (response.ok) {
+        const data = await response.json();
+        const match = data.value?.find((r: Resource) => r.id === id);
+        if (match) {
+          return {
+            ...match,
+            systemData: {},
+          } as Resource;
+        }
+      }
+      return {
+        id,
+        type: `${params.namespace}/${params.type}`,
+        name: params.name,
+        systemData: {},
+        properties: {
+          provisioningState: 'Preview',
+          status: {},
+        },
+      } as Resource;
+    }
     return radiusApi.getResourceById({ id });
-  }, [id]);
+  }, [id, isPreview]);
 
   if (loading) {
     return <Progress />;
@@ -63,4 +89,15 @@ export const ResourcePage = () => {
       </TabbedLayout>
     </ResourceLayout>
   );
+};
+
+// Outer component: waits for preview state before mounting the data-fetching content
+export const ResourcePage = () => {
+  const { isPreview, loading: previewLoading } = usePreviewMode();
+
+  if (previewLoading) {
+    return <Progress />;
+  }
+
+  return <ResourcePageContent isPreview={isPreview} />;
 };

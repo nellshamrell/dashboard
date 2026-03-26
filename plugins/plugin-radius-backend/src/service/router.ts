@@ -70,6 +70,10 @@ export const radiusPlugin = createBackendPlugin({
         const router = await createRouter();
         // @ts-expect-error - Express 5 Router types are not fully compatible with Backstage's Handler type. See: https://github.com/express-promise-router/express-promise-router/issues/119
         httpRouter.use(router);
+        httpRouter.addAuthPolicy({
+          path: '/',
+          allow: 'unauthenticated',
+        });
       },
     });
   },

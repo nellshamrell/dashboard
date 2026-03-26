@@ -5547,6 +5547,7 @@ __metadata:
     "@backstage/plugin-kubernetes-backend": "npm:^0.21.2"
     "@backstage/plugin-proxy-backend": "npm:^0.6.11"
     "@internal/app": "workspace:^"
+    "@internal/plugin-radius-backend": "workspace:^"
     "@types/jest": "npm:^29.5.14"
     better-sqlite3: "npm:^12.8.0"
     jest: "npm:^29.7.0"
@@ -5555,7 +5556,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@internal/plugin-radius-backend@workspace:plugins/plugin-radius-backend":
+"@internal/plugin-radius-backend@workspace:^, @internal/plugin-radius-backend@workspace:plugins/plugin-radius-backend":
   version: 0.0.0-use.local
   resolution: "@internal/plugin-radius-backend@workspace:plugins/plugin-radius-backend"
   dependencies:
