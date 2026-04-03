@@ -211,4 +211,45 @@ describe('ApplicationTab', () => {
       ).toBeInTheDocument();
     });
   });
+
+  it('falls back to live Kubernetes proxy when isPreview is false', async () => {
+    usePreviewMode.mockReturnValue({
+      isPreview: false,
+      status: { previewMode: false },
+      loading: false,
+    });
+
+    const mockFetch = jest.fn();
+
+    const mockKubernetesApi = {
+      getClusters: jest.fn().mockResolvedValue([{ name: 'test-cluster' }]),
+      proxy: jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockGraphData,
+        text: async () => '',
+      }),
+    };
+
+    render(
+      <TestApiProvider
+        apis={[
+          [fetchApiRef, { fetch: mockFetch }],
+          [kubernetesApiRef, mockKubernetesApi],
+        ]}
+      >
+        <ApplicationTab application={APPLICATION_ID} />
+      </TestApiProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('app-graph')).toBeInTheDocument();
+    });
+
+    // Should use Kubernetes proxy, not the preview endpoint
+    expect(mockKubernetesApi.proxy).toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalledWith(
+      expect.stringContaining('/api/radius/preview/graph/'),
+      expect.anything(),
+    );
+  });
 });

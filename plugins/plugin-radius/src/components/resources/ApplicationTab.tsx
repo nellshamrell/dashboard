@@ -9,7 +9,7 @@ import { kubernetesApiRef } from '@backstage/plugin-kubernetes';
 import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 import useAsync from 'react-use/lib/useAsync';
 import { AppGraph } from '@radapp.io/rad-components';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Typography } from '@material-ui/core';
 import { usePreviewMode } from '../../preview/usePreviewMode';
 import { PreviewBanner } from '../preview/PreviewBanner';
 
@@ -96,6 +96,8 @@ export const ApplicationTab = ({ application }: { application: string }) => {
     return <ResponseErrorPanel error={error} />;
   }
 
+  const hasResources = value.resources && value.resources.length > 0;
+
   return (
     <>
       <PreviewBanner isPreview={isPreview} />
@@ -107,9 +109,15 @@ export const ApplicationTab = ({ application }: { application: string }) => {
             : undefined
         }
       >
-        <div className={styles.container}>
-          <AppGraph graph={value!} />
-        </div>
+        {hasResources ? (
+          <div className={styles.container}>
+            <AppGraph graph={value!} />
+          </div>
+        ) : (
+          <Typography variant="body1" style={{ padding: 16 }}>
+            No Radius-targeted resources found.
+          </Typography>
+        )}
       </InfoCard>
     </>
   );
